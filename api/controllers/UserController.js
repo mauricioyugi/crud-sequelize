@@ -7,14 +7,6 @@ class UserController {
             const allUsers = await database.users.findAll({
                 attributes: { exclude: ['password'] }
             });
-            const allEmails = await database.users.findAll({ attributes: ['email']});
-            console.log(allEmails[0].email);
-            let concat = "";
-            for (let i = 0; i < allEmails.length; i++){
-                concat = concat + allEmails[i].email;
-            }
-            console.log(concat);
-
             return res.status(200).json(allUsers);
         } catch (error) {
             return res.status(400).json(error.message);
