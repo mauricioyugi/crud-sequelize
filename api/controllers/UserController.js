@@ -7,7 +7,6 @@ class UserController {
             const allUsers = await database.users.findAll({
                 attributes: { exclude: ['password'] }
             });
-            console.log(allUsers);
             return res.status(200).json(allUsers);
         } catch (error) {
             return res.status(400).json(error.message);
@@ -29,11 +28,19 @@ class UserController {
     }
     static async createUser(req, res) {
         const newUser = req.body;
-        console.log(req.body.email);
+        delete newUser.password;
+        delete newUser.id;
         try {
             await schema.validate(req.body);
-            const newUserCreated = await database.users.create(newUser);
-            return res.status(200).json(newUserCreated);
+            const usersExists = await database.users.findAll({ attributes: { exclude: [ 'password' ] }, where: { email: newUser.email } });
+            if (usersExists.length == 1) {
+                return res.status(400).json('O email já existe');
+            } else if (usersExists.length > 1) {
+                return res.status(400).json('O email já existe, por favor contactar o suporte urgente');
+            } else {
+                const newUserCreated = await database.users.create(newUser);
+                return res.status(200).json(newUserCreated);
+            }
         } catch (error) {
             return res.status(400).json(error.message);
         }
@@ -41,8 +48,18 @@ class UserController {
     static async updateUser(req, res) {
         const newUserInfo = req.body;
         const { id } = req.params;
+        delete newUserInfo.password;
+        delete newUserInfo.id;
         try {
             await schema.validate(req.body);
+            const usersExists = await database.users.findAll({ attributes: { exclude: [ 'password' ] }, where: { email: newUserInfo.email } });
+            if (usersExists.length == 1) {
+                if ( usersExists[0].dataValues.id != id ) {
+                    return res.status(400).json('O email já existe');
+                }
+            } else if (usersExists.length > 1) {
+                return res.status(400).json('O email já existe, por favor contactar o suporte urgente');
+            }
             await database.users.update(newUserInfo, { where: { id: Number(id) } });
             const userUpdated = await database.users.findOne({ 
                 where: { 
