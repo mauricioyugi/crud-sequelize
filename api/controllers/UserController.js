@@ -7,6 +7,7 @@ class UserController {
             const allUsers = await database.users.findAll({
                 attributes: { exclude: ['password'] }
             });
+            console.log(allUsers);
             return res.status(200).json(allUsers);
         } catch (error) {
             return res.status(400).json(error.message);
