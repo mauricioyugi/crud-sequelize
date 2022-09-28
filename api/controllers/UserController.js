@@ -12,6 +12,24 @@ class UserController {
             return res.status(400).json(error.message);
         }
     }
+    static async getUserByEmail(email) {
+        try {
+            const user = await database.users.findOne({ 
+                //attributes: { exclude: ['password'] },
+                where: { 
+                    email: String(email) 
+                }
+             });
+             //return res.status(200).json(user);
+            if (user) {
+                return user.dataValues;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            return new Error(error.message);
+        }
+    }
     static async getUserById(req, res) {
         const { id } = req.params
         try {
