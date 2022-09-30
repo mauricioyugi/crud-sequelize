@@ -15,12 +15,10 @@ class UserController {
     static async getUserByEmail(email) {
         try {
             const user = await database.users.findOne({ 
-                //attributes: { exclude: ['password'] },
                 where: { 
                     email: String(email) 
                 }
              });
-             //return res.status(200).json(user);
             if (user) {
                 return user.dataValues;
             } else {
