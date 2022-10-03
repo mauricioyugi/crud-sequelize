@@ -6,15 +6,23 @@ function createToken(user) {
     const payload = {
         id: user.id
     };
-    const token = jwt.sign(payload, process.env.key_jwt);
+    const token = jwt.sign(payload, process.env.key_jwt, { expiresIn: 120 });
     return token;     
+}
+
+function checkTokenExpiration(token) {
+    try {
+        var decoded = jwt.verify(token, process.env.key_jwt);
+        return decoded;
+    } catch (err) {
+        return new Error(err);
+    }
 }
 
 async function login(req, res) {
     try {
         
         const user = await UserController.getUserByEmail(req.body.email);
-        console.log(user);
         if (!user){
             return res.status(401).json({status: 401, message: "Email or password is invalid#1"});
         }
@@ -23,7 +31,6 @@ async function login(req, res) {
             return res.status(401).json({status: 401, message: "Email or password is invalid#2"});
         }
         const jwt_token = createToken(user);
-        //const jwt_token = 'klgnlfdhsksmkdfdsflsfjvklnenvljslsihvhsvknslvs';
         const authResponse = { ...user, token: jwt_token };
         delete authResponse.password;
         delete authResponse.id;
@@ -36,4 +43,4 @@ async function login(req, res) {
     }
 }
 
-module.exports = { login };
+module.exports = { login, checkTokenExpiration };
